@@ -15,6 +15,8 @@
         html {
             height: 100%;
             overflow: hidden;
+            /* Fix para mobile viewport */
+            height: 100dvh;
         }
         
         * {
@@ -30,8 +32,12 @@
             overflow: hidden;
             font-family: 'Arial', sans-serif;
             width: 100vw;
+            width: 100dvw;
             height: 100vh;
+            height: 100dvh;
             position: fixed;
+            top: 0;
+            left: 0;
         }
         
         #loading-screen {
@@ -122,18 +128,30 @@
             position: fixed !important;
             top: 0 !important;
             left: 0 !important;
+            right: 0 !important;
+            bottom: 0 !important;
         }
         
-        /* Força canvas AR a ocupar tela inteira */
+        /* Força canvas AR a ocupar tela inteira sem distorção */
         .ar-scene canvas {
+            position: absolute !important;
+            top: 0 !important;
+            left: 0 !important;
             width: 100% !important;
             height: 100% !important;
+            object-fit: cover !important;
+            display: block !important;
         }
         
         a-scene {
-            display: block;
-            width: 100%;
-            height: 100%;
+            display: block !important;
+            position: fixed !important;
+            width: 100% !important;
+            height: 100% !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            bottom: 0 !important;
         }
         
         #marker-link {
@@ -175,6 +193,25 @@
         }
         
         @media (max-width: 600px) {
+            html, body {
+                height: 100dvh !important;
+                width: 100dvw !important;
+            }
+            
+            .ar-scene {
+                height: 100dvh !important;
+                width: 100dvw !important;
+            }
+            
+            .ar-scene canvas {
+                object-fit: cover !important;
+            }
+            
+            a-scene {
+                height: 100dvh !important;
+                width: 100dvw !important;
+            }
+            
             #instructions {
                 font-size: 12px;
                 padding: 10px 16px;
@@ -233,7 +270,7 @@
     <a-scene
         class="ar-scene"
         vr-mode-ui="enabled: false"
-        arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono; trackingMethod: best;"
+        arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono; trackingMethod: best; sourceWidth: 1280; sourceHeight: 720; displayWidth: 1280; displayHeight: 720;"
         embedded
         renderer="logarithmicDepthBuffer: true; precision: medium; antialias: true;"
     >
@@ -246,7 +283,7 @@
             <a-entity
                 id="coca-model"
                 gltf-model="url(CocaCola.glb)"
-                scale="15 15 15"
+                scale="13 13 13"
                 position="1 0 0"
                 rotation="0 0 0"
             ></a-entity>
