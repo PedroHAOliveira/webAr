@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>WebAR Coca-Cola</title>
     
     <!-- A-Frame -->
@@ -12,10 +12,19 @@
     <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
     
     <style>
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
         body {
             margin: 0;
+            padding: 0;
             overflow: hidden;
             font-family: 'Arial', sans-serif;
+            width: 100vw;
+            height: 100vh;
+            position: fixed;
         }
         
         #loading-screen {
@@ -54,58 +63,111 @@
             100% { transform: rotate(360deg); }
         }
         
+        #loading-screen h2 {
+            font-size: 20px;
+            margin: 10px 0;
+        }
+        
+        #loading-screen p {
+            font-size: 14px;
+            margin: 5px 0;
+        }
+        
         #instructions {
             position: fixed;
-            top: 20px;
+            top: 10px;
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.7);
+            background: rgba(0, 0, 0, 0.8);
             color: white;
-            padding: 15px 25px;
+            padding: 10px 20px;
             border-radius: 10px;
-            font-size: 14px;
+            font-size: 12px;
             text-align: center;
             z-index: 1000;
-            max-width: 90%;
+            max-width: 85%;
             backdrop-filter: blur(10px);
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
         }
         
         #instructions h3 {
-            margin: 0 0 10px 0;
-            font-size: 18px;
+            margin: 0 0 8px 0;
+            font-size: 16px;
             color: #ff6b6b;
         }
         
         #instructions p {
-            margin: 5px 0;
+            margin: 3px 0;
+            line-height: 1.4;
+        }
+        
+        #instructions small {
+            display: block;
+            margin-top: 5px;
+            opacity: 0.8;
+            font-size: 10px;
         }
         
         .ar-scene {
-            width: 100vw;
-            height: 100vh;
+            width: 100vw !important;
+            height: 100vh !important;
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
         }
         
         #marker-link {
             position: fixed;
-            bottom: 20px;
+            bottom: 15px;
             left: 50%;
             transform: translateX(-50%);
             background: #ff6b6b;
             color: white;
-            padding: 12px 24px;
+            padding: 10px 20px;
             border-radius: 25px;
             text-decoration: none;
             font-weight: bold;
+            font-size: 14px;
             z-index: 1000;
             box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
             transition: all 0.3s ease;
+            white-space: nowrap;
         }
         
-        #marker-link:hover {
+        #marker-link:active {
             background: #ff5252;
-            transform: translateX(-50%) translateY(-2px);
-            box-shadow: 0 6px 20px rgba(255, 107, 107, 0.6);
+            transform: translateX(-50%) scale(0.95);
+        }
+        
+        #debug-info {
+            position: fixed;
+            bottom: 60px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            color: #00ff00;
+            padding: 8px;
+            border-radius: 5px;
+            font-size: 10px;
+            font-family: monospace;
+            z-index: 1000;
+            max-width: calc(100% - 20px);
+            word-wrap: break-word;
+        }
+        
+        @media (max-width: 600px) {
+            #instructions {
+                font-size: 11px;
+                padding: 8px 15px;
+            }
+            
+            #instructions h3 {
+                font-size: 14px;
+            }
+            
+            #marker-link {
+                font-size: 13px;
+                padding: 8px 16px;
+            }
         }
     </style>
 </head>
@@ -120,71 +182,119 @@
     <!-- Instructions -->
     <div id="instructions">
         <h3>📱 Instruções</h3>
-        <p>1. Permita o acesso à câmera</p>
-        <p>2. Aponte para o marker ARCode ID 0 (5x5)</p>
+        <p>1. Permita acesso à câmera</p>
+        <p>2. Aponte para o marker Hiro</p>
         <p>3. Veja a Coca-Cola em 3D! 🥤</p>
+        <small>Use o marker padrão Hiro do AR.js</small>
     </div>
     
+    <!-- Debug Info -->
+    <div id="debug-info">Aguardando câmera...</div>
+    
     <!-- Link to download marker -->
-    <a id="marker-link" href="marker-arcode-0.png" download>📥 Baixar Marker</a>
+    <a id="marker-link" href="https://raw.githubusercontent.com/AR-js-org/AR.js/master/data/images/hiro.png" target="_blank">📥 Ver Marker Hiro</a>
     
     <!-- AR Scene -->
     <a-scene
         class="ar-scene"
         vr-mode-ui="enabled: false"
-        arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3;"
+        arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono; trackingMethod: best;"
         embedded
-        renderer="logarithmicDepthBuffer: true; precision: medium;"
-        gesture-detector
+        renderer="logarithmicDepthBuffer: true; precision: medium; antialias: true;"
     >
         <!-- Camera -->
         <a-entity camera></a-entity>
         
-        <!-- Marker: ARCode ID 0 -->
-        <a-marker
-            type="barcode"
-            value="0"
-            smooth="true"
-            smoothCount="5"
-            smoothTolerance="0.01"
-            smoothThreshold="2"
-        >
+        <!-- Marker: Hiro (mais confiável) -->
+        <a-marker preset="hiro" id="hiro-marker">
             <!-- Coca-Cola 3D Model -->
             <a-entity
+                id="coca-model"
                 gltf-model="url(CocaCola.glb)"
-                scale="0.5 0.5 0.5"
-                position="0 0 0"
-                rotation="0 0 0"
-                animation="property: rotation; to: 0 360 0; loop: true; dur: 10000; easing: linear"
+                scale="1 1 1"
+                position="0 0.5 0"
+                rotation="-90 0 0"
             ></a-entity>
+            
+            <!-- Caixa de teste (para debug) -->
+            <a-box 
+                position="0 0.5 0" 
+                material="color: red; opacity: 0.5;" 
+                scale="0.3 0.3 0.3"
+                id="test-box"
+            ></a-box>
         </a-marker>
     </a-scene>
     
     <script>
+        const debugInfo = document.getElementById('debug-info');
+        const instructions = document.getElementById('instructions');
+        
+        function log(msg) {
+            console.log(msg);
+            debugInfo.textContent = msg;
+        }
+        
         // Hide loading screen when AR scene is loaded
         window.addEventListener('load', () => {
+            log('Página carregada');
             setTimeout(() => {
                 const loadingScreen = document.getElementById('loading-screen');
                 loadingScreen.classList.add('hidden');
-            }, 2000);
+                log('WebAR iniciado - aponte para o marker');
+            }, 3000);
         });
         
-        // Log marker detection
-        const marker = document.querySelector('a-marker');
-        
-        marker.addEventListener('markerFound', () => {
-            console.log('Marker ARCode ID 0 detectado!');
-            const instructions = document.getElementById('instructions');
-            instructions.style.background = 'rgba(76, 175, 80, 0.8)';
-            instructions.innerHTML = '<h3>✅ Marker Detectado!</h3><p>Modelo 3D carregado com sucesso!</p>';
+        // Wait for A-Frame to load
+        document.addEventListener('DOMContentLoaded', () => {
+            const sceneEl = document.querySelector('a-scene');
+            const marker = document.querySelector('#hiro-marker');
+            const model = document.querySelector('#coca-model');
+            const testBox = document.querySelector('#test-box');
+            
+            // Scene loaded
+            sceneEl.addEventListener('loaded', () => {
+                log('Cena AR carregada com sucesso');
+            });
+            
+            // Model loaded
+            model.addEventListener('model-loaded', () => {
+                log('Modelo 3D carregado!');
+                // Hide test box when model loads
+                testBox.setAttribute('visible', 'false');
+            });
+            
+            // Model error
+            model.addEventListener('model-error', (e) => {
+                log('ERRO ao carregar modelo: ' + e.detail);
+            });
+            
+            // Marker detection
+            marker.addEventListener('markerFound', () => {
+                log('✅ MARKER DETECTADO!');
+                instructions.style.background = 'rgba(76, 175, 80, 0.9)';
+                instructions.innerHTML = '<h3>✅ Marker Detectado!</h3><p>O modelo deve aparecer agora!</p>';
+                
+                // Make test box visible if model not loaded
+                setTimeout(() => {
+                    if (!model.hasLoaded) {
+                        testBox.setAttribute('visible', 'true');
+                        log('Modelo não carregou - mostrando caixa de teste');
+                    }
+                }, 1000);
+            });
+            
+            marker.addEventListener('markerLost', () => {
+                log('❌ Marker perdido - aponte novamente');
+                instructions.style.background = 'rgba(0, 0, 0, 0.8)';
+                instructions.innerHTML = '<h3>📱 Instruções</h3><p>1. Permita acesso à câmera</p><p>2. Aponte para o marker Hiro</p><p>3. Veja a Coca-Cola em 3D! 🥤</p><small>Use o marker padrão Hiro do AR.js</small>';
+            });
         });
         
-        marker.addEventListener('markerLost', () => {
-            console.log('Marker perdido');
-            const instructions = document.getElementById('instructions');
-            instructions.style.background = 'rgba(0, 0, 0, 0.7)';
-            instructions.innerHTML = '<h3>📱 Instruções</h3><p>1. Permita o acesso à câmera</p><p>2. Aponte para o marker ARCode ID 0 (5x5)</p><p>3. Veja a Coca-Cola em 3D! 🥤</p>';
-        });
+        // Prevent scrolling on mobile
+        document.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+        }, { passive: false });
     </script>
 </body>
 </html>
