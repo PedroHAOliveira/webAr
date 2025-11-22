@@ -12,9 +12,16 @@
     <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
     
     <style>
+        html {
+            height: 100%;
+            overflow: hidden;
+        }
+        
         * {
             box-sizing: border-box;
             -webkit-tap-highlight-color: transparent;
+            margin: 0;
+            padding: 0;
         }
         
         body {
@@ -115,6 +122,18 @@
             position: fixed !important;
             top: 0 !important;
             left: 0 !important;
+        }
+        
+        /* Força canvas AR a ocupar tela inteira */
+        .ar-scene canvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
+        
+        a-scene {
+            display: block;
+            width: 100%;
+            height: 100%;
         }
         
         #marker-link {
@@ -218,7 +237,7 @@
         embedded
         renderer="logarithmicDepthBuffer: true; precision: medium; antialias: true;"
     >
-        <!--Camera -->
+        <!-- Camera -->
         <a-entity camera></a-entity>
         
         <!-- Marker: Hiro -->
@@ -227,8 +246,8 @@
             <a-entity
                 id="coca-model"
                 gltf-model="url(CocaCola.glb)"
-                scale="5 5 5"
-                position="0 1 0"
+                scale="15 15 15"
+                position="1 0 0"
                 rotation="0 0 0"
             ></a-entity>
         </a-marker>
